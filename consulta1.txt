@@ -1,0 +1,47 @@
+//1.-db.books.find({ genre: "Fantasía" }).pretty();
+//2.-db.authors.find({ date_of_birth: { $lt: new Date("1970-01-01") } }).pretty();
+//3.-db.books.aggregate([
+  {
+    $lookup: {
+      from: "authors",                 // Nombre de la colección de autores
+      localField: "author_id",          // Campo en la colección de libros que tiene el ID del autor
+      foreignField: "_id",              // Campo en la colección de autores que se utilizará para hacer la comparación (ID del autor)
+      as: "author_details"              // Nombre del nuevo campo donde se almacenará la información del autor
+    }
+  },
+  {
+    $unwind: "$author_details"          // Deshace el arreglo y obtiene un solo objeto por libro
+  },
+  {
+    $project: {
+      title: 1,                          // Selecciona el título del libro
+      "author_details.name": 1,          // Selecciona el nombre del autor
+      _id: 0                             // Excluye el campo _id (opcional, dependiendo de si lo quieres mostrar)
+    }
+  }
+]);
+//4.-db.authors.aggregate([
+  {
+    $match: {
+      nationality: "Argentina"  // Filtrar solo autores argentinos
+    }
+  },
+  {
+    $lookup: {
+      from: "books",  // La colección a la que se realiza la relación
+      localField: "_id",  // Campo de la colección "authors" que se utilizará
+      foreignField: "author_id",  // Campo de la colección "books" que coincide con el "author_id"
+      as: "books"  // El nombre del campo que contendrá la lista de libros relacionados
+    }
+  },
+  {
+    $project: {
+      name: 1,  // Mostrar el nombre del autor
+      books: { 
+        title: 1,    // Mostrar el título de los libros
+        year_published: 1  // Mostrar el año de publicación de los libros
+      }
+    }
+  }
+]);
+
